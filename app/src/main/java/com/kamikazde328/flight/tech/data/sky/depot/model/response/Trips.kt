@@ -10,4 +10,3 @@ data class Trips(
     @SerialName("trips_products")
     val tripsProducts: List<TripsProduct>?,
 )
-

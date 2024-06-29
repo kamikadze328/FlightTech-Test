@@ -5,6 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kamikazde328.flight.tech.data.sky.depot.TripRepository
 import com.kamikazde328.flight.tech.data.sky.depot.model.response.Trips
+import com.kamikazde328.flight.tech.data.sky.depot.model.response.TripsProduct
+import com.kamikazde328.flight.tech.ui.model.MainOneTimeEvent
+import com.kamikazde328.flight.tech.ui.model.MainUiState
+import com.kamikazde328.flight.tech.ui.model.TripProductUiModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +17,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
+    companion object {
+        private const val TAG = "MainViewModel"
+    }
+
     private val _uiState = MutableStateFlow(MainUiState.EMPTY)
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
@@ -24,12 +32,12 @@ class MainViewModel : ViewModel() {
 
 
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        Log.e("MainViewModel", "Exception: ${exception.message}")
+        Log.e(TAG, "Coroutine Exception: ${exception.message}")
         onLoadTripsFailed(exception)
     }
 
-    fun onInit() {
-        _uiState.value = uiState.value.copy(isLoading = true)
+    fun fetchData() {
+        _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch(exceptionHandler + Dispatchers.IO) {
             val result = tripRepository.showTrips()
             if (result.isSuccess) {
@@ -41,41 +49,39 @@ class MainViewModel : ViewModel() {
     }
 
     private fun onLoadTrips(result: Trips?) {
-        _uiState.value = uiState.value.copy(
+        val tripsProductsUi = result?.mapToUi().orEmpty()
+        val totalCost = tripsProductsUi.calculateTotalCost()
+
+        _uiState.value = _uiState.value.copy(
             isLoading = false,
-            result = result.toString(),
+            totalCost = totalCost,
+            trips = tripsProductsUi
+        )
+    }
+
+    private fun List<TripProductUiModel>.calculateTotalCost(): Double {
+        return sumOf { (it.cost ?: 0.0) * it.quantity }
+    }
+
+    private fun Trips.mapToUi(): List<TripProductUiModel> {
+        return tripsProducts?.mapNotNull { it.mapToUi() }.orEmpty()
+    }
+
+    private fun TripsProduct.mapToUi(): TripProductUiModel? {
+        return TripProductUiModel(
+            id = id ?: return null,
+            quantity = quantity?.toIntOrNull() ?: 0,
+            title = title.orEmpty(),
+            cost = cost?.toDoubleOrNull(),
+            isPhysical = physical.equals("y", true),
         )
     }
 
     private fun onLoadTripsFailed(throwable: Throwable?) {
-        _uiState.value = uiState.value.copy(
+        _uiState.value = _uiState.value.copy(
             isLoading = false,
         )
         val message = throwable?.message ?: "Unknown error"
         _oneTimeEvent.value = listOf(MainOneTimeEvent.ShowError(message))
     }
-
-}
-
-data class MainUiState(
-    val isLoading: Boolean,
-    val result: String,
-    val trips: List<TripUiModel>,
-) {
-    companion object {
-        val EMPTY = MainUiState(
-            isLoading = false,
-            result = "",
-            trips = emptyList()
-        )
-    }
-}
-
-data class TripUiModel(
-    val id: String,
-    val company: String,
-)
-
-sealed class MainOneTimeEvent {
-    class ShowError(val message: String) : MainOneTimeEvent()
 }

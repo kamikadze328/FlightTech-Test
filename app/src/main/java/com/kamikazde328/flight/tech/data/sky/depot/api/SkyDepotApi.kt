@@ -8,8 +8,8 @@ import com.kamikazde328.flight.tech.data.sky.depot.model.request.TripsParams
 import com.kamikazde328.flight.tech.data.sky.depot.model.response.Trips
 import com.kamikazde328.flight.tech.data.sky.depot.model.response.TripsResultResponse
 import com.kamikazde328.flight.tech.network.HttpClientDefaultFactory
-import com.kamikazde328.flight.tech.network.http.HttpClient
 import com.kamikazde328.flight.tech.network.JsonRpcApiClient.fetchData
+import com.kamikazde328.flight.tech.network.http.HttpClient
 
 @Suppress("unused")
 class SkyDepotApi(

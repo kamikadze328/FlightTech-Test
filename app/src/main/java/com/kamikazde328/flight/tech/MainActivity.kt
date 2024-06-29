@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        viewModel.onInit()
+        viewModel.fetchData()
 
         setContent {
             FlightTechTestTheme {
