@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kamikazde328.flight.tech.data.sky.depot.TripRepository
-import com.kamikazde328.flight.tech.data.sky.depot.model.response.Trips
 import com.kamikazde328.flight.tech.data.sky.depot.model.response.TripsProduct
 import com.kamikazde328.flight.tech.ui.model.MainOneTimeEvent
 import com.kamikazde328.flight.tech.ui.model.MainUiState
@@ -39,17 +38,13 @@ class MainViewModel : ViewModel() {
     fun fetchData() {
         _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch(exceptionHandler + Dispatchers.IO) {
-            val result = tripRepository.showTrips()
-            if (result.isSuccess) {
-                onLoadTrips(result.getOrNull())
-            } else {
-                onLoadTripsFailed(result.exceptionOrNull())
-            }
+            val trips = tripRepository.showTrips()
+            onLoadTrips(trips)
         }
     }
 
-    private fun onLoadTrips(result: Trips?) {
-        val tripsProductsUi = result?.mapToUi().orEmpty()
+    private fun onLoadTrips(trips: List<TripsProduct>) {
+        val tripsProductsUi = trips.mapToUi()
         val totalCost = tripsProductsUi.calculateTotalCost()
 
         _uiState.value = _uiState.value.copy(
@@ -63,8 +58,8 @@ class MainViewModel : ViewModel() {
         return sumOf { (it.cost ?: 0.0) * it.quantity }
     }
 
-    private fun Trips.mapToUi(): List<TripProductUiModel> {
-        return tripsProducts?.mapNotNull { it.mapToUi() }.orEmpty()
+    private fun List<TripsProduct>.mapToUi(): List<TripProductUiModel> {
+        return mapNotNull { it.mapToUi() }
     }
 
     private fun TripsProduct.mapToUi(): TripProductUiModel? {

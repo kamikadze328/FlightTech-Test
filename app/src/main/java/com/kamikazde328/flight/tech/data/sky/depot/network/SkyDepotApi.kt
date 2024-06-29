@@ -1,4 +1,4 @@
-package com.kamikazde328.flight.tech.data.sky.depot.api
+package com.kamikazde328.flight.tech.data.sky.depot.network
 
 import com.kamikazde328.flight.tech.data.sky.depot.model.request.DefaultRequestParams
 import com.kamikazde328.flight.tech.data.sky.depot.model.request.PlaneRequestParams
