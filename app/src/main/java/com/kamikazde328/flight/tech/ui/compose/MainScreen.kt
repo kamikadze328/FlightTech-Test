@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -61,9 +62,9 @@ private fun OneTimeEventsProcesses(oneTimeEvents: ListWrapper<MainOneTimeEvent>)
 fun PullToRefreshTripsProducts(
     totalCost: Double,
     products: ListWrapper<TripProductUiModel>,
+    modifier: Modifier = Modifier,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -118,7 +119,7 @@ fun ProductsList(products: ListWrapper<TripProductUiModel>, modifier: Modifier =
 @Composable
 fun Product(product: TripProductUiModel, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.padding(top = 10.dp, end = 10.dp)
+        modifier = modifier.padding(top = 15.dp, end = 15.dp)
     ) {
         val color = if (product.isPhysical) {
             MaterialTheme.colorScheme.primary
@@ -153,13 +154,16 @@ fun ProductsHeader(productsCount: Int, totalCost: Double, modifier: Modifier = M
     Column(
         modifier = modifier
     ) {
-        Text(
-            text = "There is $productsCount products!",
-            color = MaterialTheme.colorScheme.onSurface
+        val style = MaterialTheme.typography.titleLarge.copy(
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
+            style = style,
+            text = "There is $productsCount products!",
+        )
+        Text(
+            style = style,
             text = "Total cost is $totalCost...",
-            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
